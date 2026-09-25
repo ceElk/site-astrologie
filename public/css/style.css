@@ -1,0 +1,20 @@
+body {
+  background-color: #0b0f1a;
+  color: white;
+}
+
+/* Carte formulaire */
+.card {
+  background-color: #12192b;
+  border-radius: 15px;
+}
+
+/* Bouton astro style */
+.btn-primary {
+  background: linear-gradient(45deg, #7b2ff7, #00c6ff);
+  border: none;
+}
+
+h1 {
+  font-weight: 300;
+}
