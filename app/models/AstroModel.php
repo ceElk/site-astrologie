@@ -2,45 +2,51 @@
 
 class AstroModel
 {
-    public function getTheme($date, $heure, $lat, $lon)
-    {
-        $url = "http://127.0.0.1:5001/theme"
-             . "?date=$date"
-             . "&heure=$heure"
-             . "&lat=$lat"
-             . "&lon=$lon";
+    private string $apiUrl = "http://127.0.0.1:5001/theme";
+    private ?array $texts = null;
 
-        $json = file_get_contents($url);
+    public function getTheme($date, $heure, $lat, $lon, $zodiac = 'tropical', $ayanamsa = 'lahiri')
+    {
+        $params = http_build_query([
+            'date'     => $date,
+            'heure'    => $heure,
+            'lat'      => $lat,
+            'lon'      => $lon,
+            'zodiac'   => $zodiac,
+            'ayanamsa' => $ayanamsa,
+        ]);
+
+        $json = @file_get_contents($this->apiUrl . "?" . $params);
+
+        if ($json === false) {
+            return ['error' => "L'API astrologique ne répond pas. Vérifie que astro_api.py est lancé."];
+        }
 
         return json_decode($json, true);
     }
+
     public function getSign($deg)
-{
-    $signs = [
-        "Bélier", "Taureau", "Gémeaux", "Cancer",
-        "Lion", "Vierge", "Balance", "Scorpion",
-        "Sagittaire", "Capricorne", "Verseau", "Poissons"
-    ];
+    {
+        $signs = [
+            "Bélier", "Taureau", "Gémeaux", "Cancer",
+            "Lion", "Vierge", "Balance", "Scorpion",
+            "Sagittaire", "Capricorne", "Verseau", "Poissons"
+        ];
 
-    return $signs[floor($deg / 30)];
-}
-public function interpret($planet, $sign)
-{
-    $texts = [
+        $deg = fmod($deg, 360);
+        if ($deg < 0) {
+            $deg += 360;
+        }
 
-        "sun" => [
-            "Poissons" => "Sensibilité, intuition forte, spiritualité.",
-            "Bélier" => "Énergie, initiative, leadership.",
-            "Taureau" => "Stabilité, sensualité, attachement au concret."
-        ],
+        return $signs[(int) floor($deg / 30)];
+    }
 
-        "moon" => [
-            "Scorpion" => "Émotions intenses, profondeur psychique.",
-            "Cancer" => "Grande sensibilité familiale.",
-        ]
-    ];
+    public function interpret($planet, $sign)
+    {
+        if ($this->texts === null) {
+            $this->texts = require __DIR__ . '/../data/interpretations.php';
+        }
 
-    return $texts[$planet][$sign] ?? "Interprétation à venir.";
-}
-
+        return $this->texts[$planet][$sign] ?? "Interprétation à venir.";
+    }
 }

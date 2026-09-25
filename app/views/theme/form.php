@@ -24,18 +24,25 @@
     font-size: 14px;
 }
 
-.form-astro .form-control {
-    background: rgba(2,11,24,0.8);
+.form-astro .form-control,
+.form-astro .form-select {
+    background-color: rgba(2,11,24,0.8);
     border: 1px solid rgba(200,169,110,0.3);
     color: #e0e0ff;
     border-radius: 8px;
 }
 
-.form-astro .form-control:focus {
-    background: rgba(2,11,24,0.9);
+.form-astro .form-control:focus,
+.form-astro .form-select:focus {
+    background-color: rgba(2,11,24,0.9);
     border-color: #c8a96e;
     color: #e0e0ff;
     box-shadow: 0 0 8px rgba(200,169,110,0.3);
+}
+
+.form-astro .form-select option {
+    background: #06142b;
+    color: #e0e0ff;
 }
 
 .form-astro .form-control::placeholder {
@@ -83,6 +90,24 @@
                    placeholder="Ex : Paris">
         </div>
 
+        <div class="mb-3">
+            <label class="form-label" for="zodiac">✦ Zodiaque</label>
+            <select class="form-select" name="zodiac" id="zodiac">
+                <option value="tropical">Tropical</option>
+                <option value="sidereal">Sidéral</option>
+            </select>
+        </div>
+
+        <div class="mb-3" id="ayanamsa-group" style="display: none;">
+            <label class="form-label" for="ayanamsa">✦ Ayanamsa</label>
+            <select class="form-select" name="ayanamsa" id="ayanamsa">
+                <option value="lahiri">Lahiri</option>
+                <option value="fagan_bradley">Fagan-Bradley</option>
+                <option value="krishnamurti">Krishnamurti</option>
+                <option value="raman">Raman</option>
+            </select>
+        </div>
+
         <button class="btn btn-astro w-100 mt-3">
             ✦ Calculer mon thème astral
         </button>
@@ -90,3 +115,14 @@
     </form>
 </div>
 
+<script>
+    const zodiacSelect  = document.getElementById('zodiac');
+    const ayanamsaGroup = document.getElementById('ayanamsa-group');
+
+    function toggleAyanamsa() {
+        ayanamsaGroup.style.display = zodiacSelect.value === 'sidereal' ? 'block' : 'none';
+    }
+
+    zodiacSelect.addEventListener('change', toggleAyanamsa);
+    toggleAyanamsa();
+</script>

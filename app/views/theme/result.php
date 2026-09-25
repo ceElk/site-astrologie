@@ -8,7 +8,13 @@ function getSign($deg)
         "Lion","Vierge","Balance","Scorpion",
         "Sagittaire","Capricorne","Verseau","Poissons"
     ];
-    return $signs[floor($deg / 30)];
+
+    $deg = fmod($deg, 360);
+    if ($deg < 0) {
+        $deg += 360;
+    }
+
+    return $signs[(int) floor($deg / 30)];
 }
 
 function translatePlanet($p)
@@ -97,6 +103,13 @@ $aspects   = $theme['aspects'] ?? [];
 <p>Date : <?= htmlspecialchars($date) ?></p>
 <p>Heure : <?= htmlspecialchars($heure) ?></p>
 <p>Ville : <?= htmlspecialchars($ville) ?></p>
+<p>
+    Zodiaque <?= ($theme['zodiac'] ?? 'tropical') === 'sidereal' ? 'sidéral' : 'tropical' ?>
+    <?php if (($theme['zodiac'] ?? '') === 'sidereal' && !empty($theme['ayanamsa'])): ?>
+        (<?= htmlspecialchars($theme['ayanamsa']['name']) ?> :
+        <?= number_format($theme['ayanamsa']['value'], 2, ',', '') ?>°)
+    <?php endif; ?>
+</p>
 
 <hr>
 <h2>Ascendant : <?= round($ascendant,2) ?>°</h2>
@@ -320,21 +333,17 @@ foreach ($planets as $planet => $deg) {
 </ul>
 
 <h2>Interprétation rapide</h2>
+<div class="interp">
 <?php foreach ($planets as $planet => $deg):
     $sign = getSign($deg);
-    $interp = [
-        "Poissons"   => "Sensibilité, intuition, imaginaire riche.",
-        "Capricorne" => "Ambition, structure, sérieux.",
-        "Bélier"     => "Action, impulsivité, leadership.",
-        "Scorpion"   => "Intensité émotionnelle, profondeur."
-    ];
 ?>
 <p>
     <?= translatePlanet($planet) ?>
     en <strong><?= $sign ?></strong> :
-    <?= $interp[$sign] ?? "Interprétation en cours." ?>
+    <?= htmlspecialchars($astro->interpret($planet, $sign)) ?>
 </p>
 <?php endforeach; ?>
+</div>
 <!-- Dans le <head> de ta page -->
 <style>
     body {

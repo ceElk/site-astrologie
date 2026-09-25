@@ -6,6 +6,13 @@ import pytz
 app = Flask(__name__)
 swe.set_ephe_path('.')
 
+AYANAMSAS = {
+    "lahiri"        : swe.SIDM_LAHIRI,
+    "fagan_bradley" : swe.SIDM_FAGAN_BRADLEY,
+    "krishnamurti"  : swe.SIDM_KRISHNAMURTI,
+    "raman"         : swe.SIDM_RAMAN,
+}
+
 
 def calc_aspects(planets):
     aspects = []
@@ -45,16 +52,33 @@ def theme():
         lat   = float(request.args.get("lat"))
         lon   = float(request.args.get("lon"))
 
-        y, m, d  = map(int, date.split("-"))
-        h, mi    = map(int, heure.split(":"))
+        zodiac        = request.args.get("zodiac", "tropical")
+        ayanamsa_name = request.args.get("ayanamsa", "lahiri")
+        tz_name       = request.args.get("tz", "Europe/Paris")
 
-        # ── Conversion heure locale Paris → UTC ──
-        tz_paris = pytz.timezone("Europe/Paris")
-        dt_local = tz_paris.localize(datetime(y, m, d, h, mi))
+        y, m, d = map(int, date.split("-"))
+        h, mi   = map(int, heure.split(":"))
+
+        # ── Conversion heure locale → UTC ──
+        tz       = pytz.timezone(tz_name)
+        dt_local = tz.localize(datetime(y, m, d, h, mi))
         dt_utc   = dt_local.astimezone(pytz.utc)
 
         h_utc = dt_utc.hour + dt_utc.minute / 60
         jd    = swe.julday(dt_utc.year, dt_utc.month, dt_utc.day, h_utc)
+
+        # ── Choix du zodiaque ──
+        flags = swe.FLG_SWIEPH
+        ayanamsa_value = None
+
+        if zodiac == "sidereal":
+            if ayanamsa_name not in AYANAMSAS:
+                return jsonify({"error": f"Ayanamsa inconnu : {ayanamsa_name}"}), 400
+            swe.set_sid_mode(AYANAMSAS[ayanamsa_name])
+            flags |= swe.FLG_SIDEREAL
+            ayanamsa_value = swe.get_ayanamsa_ut(jd)
+        elif zodiac != "tropical":
+            return jsonify({"error": "zodiac doit valoir 'tropical' ou 'sidereal'"}), 400
 
         planets_id = {
             "sun"      : swe.SUN,
@@ -72,13 +96,15 @@ def theme():
 
         planets = {}
         for name, pid in planets_id.items():
-            planets[name] = swe.calc_ut(jd, pid)[0][0]
+            planets[name] = swe.calc_ut(jd, pid, flags)[0][0]
 
-        houses, ascmc = swe.houses(jd, lat, lon, b'P')
+        houses, ascmc = swe.houses_ex(jd, lat, lon, b'P', flags)
 
         aspects = calc_aspects(planets)
 
         return jsonify({
+            "zodiac"   : zodiac,
+            "ayanamsa" : {"name": ayanamsa_name, "value": ayanamsa_value} if zodiac == "sidereal" else None,
             "planets"  : planets,
             "houses"   : list(houses),
             "ascendant": ascmc[0],
