@@ -241,7 +241,7 @@ foreach ($houses as $i => $houseDeg) {
     $xNum = $cx + cos($aMid) * $rNum;
     $yNum = $cy + sin($aMid) * $rNum;
 
-    $numero = ($i === 11) ? 1 : $i + 2;
+    $numero = $i + 1;
 
     echo "<text x='$xNum' y='$yNum'
                 fill='#aaaaee' font-size='12'

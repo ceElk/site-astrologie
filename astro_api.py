@@ -98,7 +98,7 @@ def theme():
         for name, pid in planets_id.items():
             planets[name] = swe.calc_ut(jd, pid, flags)[0][0]
 
-        houses, ascmc = swe.houses_ex(jd, lat, lon, b'P', flags)
+        houses, ascmc = swe.houses_ex(jd, lat, lon, b'K', flags) #domiciliation koch(b'K)
 
         aspects = calc_aspects(planets)
 
