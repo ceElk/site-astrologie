@@ -3,6 +3,7 @@ import swisseph as swe
 from datetime import datetime
 import pytz
 
+#pour relancer python python3 astro_api.py dans le terminal
 app = Flask(__name__)
 swe.set_ephe_path('.')
 
