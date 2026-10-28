@@ -3,23 +3,34 @@ name: CI/CD - Déploiement production
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 jobs:
-  verifier:
+  tests:
     runs-on: ubuntu-latest
     steps:
       - name: Récupération du code
         uses: actions/checkout@v4
 
-      - name: Vérification syntaxe Python
-        run: python3 -m py_compile astro_api.py
+      - name: Installation de Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Installation des dépendances
+        run: pip install -r requirements.txt pytest
 
       - name: Vérification syntaxe PHP
         run: find app public -name "*.php" -print0 | xargs -0 -n1 php -l
 
+      - name: Tests unitaires
+        run: python -m pytest -v
+
   deployer:
-    needs: verifier
+    needs: tests
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - name: Déploiement sur le VPS via SSH
