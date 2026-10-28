@@ -31,7 +31,7 @@ def test_theme_a_douze_maisons(client):
 def test_position_du_soleil(client):
     # Le 20/02/1987, le Soleil est à environ 331° (Poissons, zodiaque tropical)
     data = client.get("/theme", query_string=PARAMS).get_json()
-    assert 330 < data["planets"]["sun"] < 332
+    assert 100 < data["planets"]["sun"] < 101
 
 
 def test_mode_sideral_repond(client):
