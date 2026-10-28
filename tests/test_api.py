@@ -38,3 +38,9 @@ def test_mode_sideral_repond(client):
     params = {**PARAMS, "zodiac": "sidereal", "ayanamsa": "lahiri"}
     reponse = client.get("/theme", query_string=params)
     assert reponse.status_code == 200
+
+
+
+def test_theme_contient_des_aspects(client):
+    data = client.get("/theme", query_string=PARAMS).get_json()
+    assert len(data["aspects"]) > 0
