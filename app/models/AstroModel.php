@@ -5,6 +5,11 @@ class AstroModel
     private string $apiUrl = "http://127.0.0.1:5001/theme";
     private ?array $texts = null;
 
+    public function __construct()
+    {
+        $this->apiUrl = $_SERVER['ASTRO_API_URL'] ?? $this->apiUrl;
+    }
+
     public function getTheme($date, $heure, $lat, $lon, $zodiac = 'tropical', $ayanamsa = 'lahiri')
     {
         $params = http_build_query([
