@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../config/mail.php';
 require '../vendor/autoload.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
@@ -20,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $mail->Host       = 'smtp.gmail.com';
         $mail->SMTPAuth   = true;
         $mail->Username   = 'cecilia.elkrieff@gmail.com';
-        $mail->Password   = 'belm ikgj jotu ttxv'; // ← 16 caractères générés par Google
+        $mail->Password   = MAIL_PASSWORD;
         $mail->SMTPSecure = 'tls';
         $mail->Port       = 587;
         $mail->CharSet    = 'UTF-8';
