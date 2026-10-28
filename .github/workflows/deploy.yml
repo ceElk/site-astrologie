@@ -1,10 +1,10 @@
-name: CI/CD - Déploiement production
+name: CI/CD - Préproduction et production
 
 on:
   push:
-    branches: [main]
+    branches: [main, preprod]
   pull_request:
-    branches: [main]
+    branches: [main, preprod]
   workflow_dispatch:
 
 jobs:
@@ -28,12 +28,31 @@ jobs:
       - name: Tests unitaires
         run: python -m pytest -v
 
-  deployer:
+  deployer-preprod:
+    needs: tests
+    if: github.event_name == 'push' && github.ref == 'refs/heads/preprod'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Déploiement en préproduction
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -e
+            cd /var/www/site-astrologie-preprod
+            git pull origin preprod
+            venv/bin/pip install -r requirements.txt
+            systemctl restart astro-api-preprod
+            systemctl reload nginx
+
+  deployer-production:
     needs: tests
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-      - name: Déploiement sur le VPS via SSH
+      - name: Déploiement en production
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.VPS_HOST }}
